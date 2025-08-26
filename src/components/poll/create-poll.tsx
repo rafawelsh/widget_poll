@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { PollOption } from './poll';
 
+type PollType = { name: string; votes: number };
+
 export default function CreatePoll() {
 	const [currentOption, setCurrentOption] = useState('');
-	const [pollOptions, setPollOptions] = useState([]);
+	const [pollOptions, setPollOptions] = useState<PollType[]>([]);
 
-	const handleAdd = (e) => {
+	const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 
 		if (!currentOption) {
@@ -19,7 +21,7 @@ export default function CreatePoll() {
 		}
 	};
 
-	const handleSavePoll = (e) => {
+	const handleSavePoll = () => {
 		// reset currentOption and pollOptions
 		setCurrentOption('');
 		setPollOptions([]);
@@ -44,12 +46,12 @@ export default function CreatePoll() {
 
 			<button onClick={(e) => handleAdd(e)}>Add to poll</button>
 
-			<button onClick={(e) => handleSavePoll(e)}>Save Poll</button>
+			<button onClick={() => handleSavePoll()}>Save Poll</button>
 		</div>
 	);
 }
 
-export function PollCard({ pollOptions }) {
+export function PollCard({ pollOptions }: { pollOptions: PollType[] }) {
 	return (
 		<div className='poll-card'>
 			{pollOptions.map(({ name, votes }) => {
