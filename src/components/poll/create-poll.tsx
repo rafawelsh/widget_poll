@@ -53,10 +53,6 @@ export function PollCard({ pollOptions }) {
 	return (
 		<div className='poll-card'>
 			{pollOptions.map(({ name, votes }) => {
-				// const percentageForOption = Math.floor(
-				// 	(votes / pollData[0].totalVotes) * 100
-				// );
-
 				return <PollOption optionText={name} votes={votes} percentage={0} />;
 			})}
 		</div>

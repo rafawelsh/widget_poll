@@ -1,26 +1,33 @@
+import { useQuery } from 'convex/react';
 import { useParams } from 'react-router';
-import { mockPollData } from './mockData/mockPolls';
+import { api } from '../../../convex/_generated/api';
+import type { Doc } from '../../../convex/_generated/dataModel';
 import './poll.css';
+
+type PollType = Doc<'polls'>;
 
 export default function Poll() {
 	const { id } = useParams();
 
+	const poll = useQuery(api.polls.getPoll, { pollId: Number(id) });
+
+	if (!poll) {
+		return null;
+	}
+
 	return (
 		<div>
-			<h1>Poll Name</h1>
-			<PollCard id={id} />
+			<h1>{poll.title}</h1>
+			<PollCard poll={poll} />
 		</div>
 	);
 }
 
-export function PollCard({ id }) {
-	const pollData = mockPollData[id - 1];
+export function PollCard({ poll }: { poll: PollType }) {
 	return (
 		<div className='poll-card'>
-			{pollData.options.map(({ name, votes }) => {
-				const percentageForOption = Math.floor(
-					(votes / pollData.totalVotes) * 100
-				);
+			{poll.options.map(({ name, votes }) => {
+				const percentageForOption = Math.floor((votes / poll.totalVotes) * 100);
 
 				return (
 					<PollOption
