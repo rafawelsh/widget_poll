@@ -4,17 +4,21 @@ import { api } from '../../../convex/_generated/api';
 import type { Doc } from '../../../convex/_generated/dataModel';
 import './poll.css';
 
-type PollType = Doc<'polls'>;
+type PollType = Pick<Doc<'polls'>, 'id' | 'title'> & {
+	pollOptions: { option: string; votes: number }[];
+	totalVotes: number;
+};
 
 export default function Poll() {
 	const { id } = useParams();
 
-	const poll = useQuery(api.polls.getPoll, { pollId: Number(id) });
+	const poll = useQuery(api.polls.getPollWithVotes, { pollId: Number(id) });
 
 	if (!poll) {
 		return null;
 	}
 
+	console.log({ poll });
 	return (
 		<div>
 			<h1>{poll.title}</h1>
@@ -26,12 +30,12 @@ export default function Poll() {
 export function PollCard({ poll }: { poll: PollType }) {
 	return (
 		<div className='poll-card'>
-			{poll.options.map(({ name, votes }) => {
+			{Object.values(poll.pollOptions).map(({ option, votes }) => {
 				const percentageForOption = Math.floor((votes / poll.totalVotes) * 100);
 
 				return (
 					<PollOption
-						optionText={name}
+						optionText={option}
 						votes={votes}
 						percentage={percentageForOption}
 					/>

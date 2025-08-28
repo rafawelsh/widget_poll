@@ -17,3 +17,33 @@ export const getPoll = query({
 			.first();
 	},
 });
+
+export const getPollWithVotes = query({
+	args: { pollId: v.number() },
+	handler: async (ctx, args) => {
+		const poll = await ctx.db
+			.query('polls')
+			.filter((q) => q.eq(q.field('id'), args.pollId))
+			.first();
+
+		if (!poll) return null;
+
+		// Votes is its own DB where we store each vote with its corresponding pollId
+		const votes = await ctx.db
+			.query('votes')
+			.withIndex('by_poll', (q) => q.eq('pollId', poll._id))
+			.collect();
+
+		const optionsWithVotes = poll.options.map((option) => ({
+			option,
+			votes: votes.filter((v) => v.answer === option).length,
+		}));
+
+		return {
+			id: poll.id,
+			title: poll.title,
+			pollOptions: optionsWithVotes,
+			totalVotes: votes.length,
+		};
+	},
+});
