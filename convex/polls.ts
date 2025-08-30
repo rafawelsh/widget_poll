@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { query } from './_generated/server';
+import { mutation, query } from './_generated/server';
 
 export const get = query({
 	args: {},
@@ -45,5 +45,23 @@ export const getPollWithVotes = query({
 			pollOptions: optionsWithVotes,
 			totalVotes: votes.length,
 		};
+	},
+});
+
+export const createPoll = mutation({
+	args: {
+		title: v.string(),
+		pollOptions: v.array(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const allPosts = await ctx.db.query('polls').collect();
+
+		const latestPostNumber = allPosts.length + 1;
+
+		await ctx.db.insert('polls', {
+			id: latestPostNumber,
+			title: args.title,
+			options: args.pollOptions,
+		});
 	},
 });

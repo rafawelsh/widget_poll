@@ -1,11 +1,14 @@
+import { useMutation } from 'convex/react';
 import { useState } from 'react';
+import { api } from '../../../convex/_generated/api';
 import { PollOption } from './poll';
-
-type PollType = { name: string; votes: number };
 
 export default function CreatePoll() {
 	const [currentOption, setCurrentOption] = useState('');
-	const [pollOptions, setPollOptions] = useState<PollType[]>([]);
+	const [pollOptions, setPollOptions] = useState<string[]>([]);
+	const [pollTitle, setPollTitle] = useState('');
+
+	const createPoll = useMutation(api.polls.createPoll);
 
 	const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
@@ -16,12 +19,13 @@ export default function CreatePoll() {
 		}
 
 		if (currentOption.trim()) {
-			setPollOptions((prev) => [...prev, { name: currentOption, votes: 0 }]);
+			setPollOptions((prev) => [...prev, currentOption]);
 			setCurrentOption('');
 		}
 	};
 
 	const handleSavePoll = () => {
+		createPoll({ title: pollTitle, pollOptions: pollOptions });
 		// reset currentOption and pollOptions
 		setCurrentOption('');
 		setPollOptions([]);
@@ -31,9 +35,19 @@ export default function CreatePoll() {
 		<div>
 			<div>Create a new poll</div>
 
+			<h3>{pollTitle}</h3>
+
 			<PollCard pollOptions={pollOptions} />
 
 			<div>
+				<label>
+					Poll title:
+					<input
+						type='text'
+						value={pollTitle}
+						onChange={(e) => setPollTitle(e.target.value)}
+					/>
+				</label>
 				<label>
 					Option:
 					<input
@@ -51,11 +65,11 @@ export default function CreatePoll() {
 	);
 }
 
-export function PollCard({ pollOptions }: { pollOptions: PollType[] }) {
+export function PollCard({ pollOptions }: { pollOptions: string[] }) {
 	return (
 		<div className='poll-card'>
-			{pollOptions.map(({ name, votes }) => {
-				return <PollOption optionText={name} votes={votes} percentage={0} />;
+			{pollOptions.map((name) => {
+				return <PollOption optionText={name} votes={0} percentage={0} />;
 			})}
 		</div>
 	);
