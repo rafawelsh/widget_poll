@@ -2,6 +2,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { useParams } from 'react-router';
 import { api } from '../../../convex/_generated/api';
 import type { Doc } from '../../../convex/_generated/dataModel';
+import { voteStorage } from '../../utils/voteStorage';
 import './poll.css';
 
 type PollType = Pick<Doc<'polls'>, 'id' | 'title'> & {
@@ -58,6 +59,16 @@ export function PollOption({
 }) {
 	const postVoteOption = useMutation(api.votes.postVote);
 	const handlePostVote = (option: string) => {
+		// should check to see if person already voted.
+		const hasUserVoted = voteStorage.hasVoted(String(id));
+		if (hasUserVoted) {
+			console.log('ALREADY VOTED IN THIS POLL');
+			return;
+		}
+
+		// has not voted, record voted
+		voteStorage.recordVote(String(id), optionText);
+
 		postVoteOption({ textOption: option, pollId: id });
 	};
 
