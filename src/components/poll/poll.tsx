@@ -1,4 +1,4 @@
-import { useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { useParams } from 'react-router';
 import { api } from '../../../convex/_generated/api';
 import type { Doc } from '../../../convex/_generated/dataModel';
@@ -18,7 +18,6 @@ export default function Poll() {
 		return null;
 	}
 
-	console.log({ poll });
 	return (
 		<div>
 			<h1>{poll.title}</h1>
@@ -35,6 +34,7 @@ export function PollCard({ poll }: { poll: PollType }) {
 
 				return (
 					<PollOption
+						id={poll.id}
 						optionText={option}
 						votes={votes}
 						percentage={percentageForOption}
@@ -46,16 +46,23 @@ export function PollCard({ poll }: { poll: PollType }) {
 }
 
 export function PollOption({
+	id,
 	optionText,
 	votes,
 	percentage,
 }: {
+	id: number;
 	optionText: string;
 	votes: number;
 	percentage: number;
 }) {
+	const postVoteOption = useMutation(api.votes.postVote);
+	const handlePostVote = (option: string) => {
+		postVoteOption({ textOption: option, pollId: id });
+	};
+
 	return (
-		<div className='poll-option'>
+		<div className='poll-option' onClick={() => handlePostVote(optionText)}>
 			<div className='poll-option-content'>
 				<div
 					className='poll-option-fill'
