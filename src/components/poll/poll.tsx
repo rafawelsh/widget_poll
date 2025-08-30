@@ -52,13 +52,17 @@ export function PollOption({
 	votes,
 	percentage,
 }: {
-	id: number;
+	id?: number;
 	optionText: string;
 	votes: number;
 	percentage: number;
 }) {
 	const postVoteOption = useMutation(api.votes.postVote);
 	const handlePostVote = (option: string) => {
+		if (!id) {
+			return;
+		}
+
 		// should check to see if person already voted.
 		const hasUserVoted = voteStorage.hasVoted(String(id));
 		if (hasUserVoted) {
